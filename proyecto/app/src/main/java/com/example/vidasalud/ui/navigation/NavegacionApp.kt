@@ -7,7 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.vidasalud.ui.screens.auth.PantallaLogin
 import com.example.vidasalud.ui.screens.auth.PantallaRegistro
 import com.example.vidasalud.ui.screens.bienvenida.PantallaBienvenida
-import com.example.vidasalud.ui.screens.principal.PantallaPrincipal
+import com.example.vidasalud.ui.screens.principal.PantallaPrincipalNavegacion
 
 @Composable
 fun NavegacionApp() {
@@ -17,23 +17,18 @@ fun NavegacionApp() {
         navController = controladorNavegacion,
         startDestination = RutasApp.PantallaBienvenida.ruta
     ) {
-
         composable(route = RutasApp.PantallaBienvenida.ruta) {
             PantallaBienvenida(controladorNavegacion = controladorNavegacion)
         }
-
         composable(route = RutasApp.PantallaLogin.ruta) {
             PantallaLogin(controladorNavegacion = controladorNavegacion)
         }
-
         composable(route = RutasApp.PantallaRegistro.ruta) {
             PantallaRegistro(controladorNavegacion = controladorNavegacion)
         }
 
         composable(route = RutasApp.PantallaPrincipal.ruta) {
-            PantallaPrincipal(controladorNavegacion = controladorNavegacion)
+            PantallaPrincipalNavegacion(navControllerPrincipal = controladorNavegacion)
         }
-
     }
 }
-
