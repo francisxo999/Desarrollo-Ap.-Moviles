@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -16,14 +17,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.vidasalud.ui.theme.BotonOscuro
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComponenteTextField(
     valor: String,
     enValorCambiado: (String) -> Unit,
     etiqueta: String,
-    esContrasena: Boolean = false
+    esContrasena: Boolean = false,
+    isError: Boolean = false,
+    errorTexto: String? = null
 ) {
     OutlinedTextField(
         value = valor,
@@ -32,6 +34,15 @@ fun ComponenteTextField(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         singleLine = true,
+        isError = isError,
+        supportingText = {
+            if (isError && errorTexto != null) {
+                Text(
+                    text = errorTexto,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = BotonOscuro,
             focusedLabelColor = BotonOscuro,

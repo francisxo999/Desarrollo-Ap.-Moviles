@@ -24,10 +24,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -35,8 +34,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.vidasalud.presentation.auth.AuthViewModel
 import com.example.vidasalud.ui.components.ComponenteTextField
 import com.example.vidasalud.ui.navigation.RutasApp
 import com.example.vidasalud.ui.theme.BotonOscuro
@@ -44,20 +45,29 @@ import com.example.vidasalud.ui.theme.VidaSaludTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaRegistro(controladorNavegacion: NavController) {
-    var nombre by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
-    var confirmarContrasena by remember { mutableStateOf("") }
+fun PantallaRegistro(
+    controladorNavegacion: NavController,
+    viewModel: AuthViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { ruta ->
+            controladorNavegacion.navigate(ruta) {
+                popUpTo(RutasApp.PantallaBienvenida.ruta) {
+                    inclusive = true
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
-            // Barra superior con botón de "atrás"
             TopAppBar(
                 title = { Text("") },
                 navigationIcon = {
                     IconButton(onClick = {
-                        controladorNavegacion.popBackStack() // Vuelve a la pantalla anterior (Login)
+                        controladorNavegacion.popBackStack()
                     }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
@@ -76,7 +86,7 @@ fun PantallaRegistro(controladorNavegacion: NavController) {
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues), // Aplica el padding de Scaffold
+                .padding(paddingValues),
             color = MaterialTheme.colorScheme.background
         ) {
             Column(
@@ -103,55 +113,53 @@ fun PantallaRegistro(controladorNavegacion: NavController) {
 
                 Spacer(modifier = Modifier.height(48.dp))
 
-                // Campo de Texto para Nombre
                 ComponenteTextField(
-                    valor = nombre,
-                    enValorCambiado = { nombre = it },
+                    valor = uiState.nombre,
+                    enValorCambiado = viewModel::onNombreChange,
                     etiqueta = "Nombre",
-                    esContrasena = false
+                    esContrasena = false,
+                    isError = uiState.errorNombre != null,
+                    errorTexto = uiState.errorNombre
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Campo de Texto para Email
                 ComponenteTextField(
-                    valor = email,
-                    enValorCambiado = { email = it },
+                    valor = uiState.email,
+                    enValorCambiado = viewModel::onEmailChange,
                     etiqueta = "Email",
-                    esContrasena = false
+                    esContrasena = false,
+                    isError = uiState.errorEmail != null,
+                    errorTexto = uiState.errorEmail
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Campo de Texto para Contraseña
                 ComponenteTextField(
-                    valor = contrasena,
-                    enValorCambiado = { contrasena = it },
+                    valor = uiState.contrasena,
+                    enValorCambiado = viewModel::onContrasenaChange,
                     etiqueta = "Contraseña",
-                    esContrasena = true
+                    esContrasena = true,
+                    isError = uiState.errorContrasena != null,
+                    errorTexto = uiState.errorContrasena
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Campo de Texto para Confirmar Contraseña
                 ComponenteTextField(
-                    valor = confirmarContrasena,
-                    enValorCambiado = { confirmarContrasena = it },
+                    valor = uiState.confirmarContrasena,
+                    enValorCambiado = viewModel::onConfirmarContrasenaChange,
                     etiqueta = "Confirmar Contraseña",
-                    esContrasena = true
+                    esContrasena = true,
+                    isError = uiState.errorConfirmarContrasena != null,
+                    errorTexto = uiState.errorConfirmarContrasena
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Botón de Registrarse
                 Button(
                     onClick = {
-                        // Lógica de registro (simulada)
-                        controladorNavegacion.navigate(RutasApp.PantallaPrincipal.ruta) {
-                            popUpTo(RutasApp.PantallaBienvenida.ruta) {
-                                inclusive = true
-                            }
-                        }
+                        viewModel.onRegistroClicked()
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -172,7 +180,6 @@ fun PantallaRegistro(controladorNavegacion: NavController) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Fila para el botón de "Ya tengo cuenta"
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
@@ -184,7 +191,7 @@ fun PantallaRegistro(controladorNavegacion: NavController) {
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     TextButton(onClick = {
-                        controladorNavegacion.popBackStack() // Vuelve a Login
+                        controladorNavegacion.popBackStack()
                     }) {
                         Text(
                             text = "Inicia Sesión",
@@ -208,4 +215,3 @@ fun PantallaRegistroPreview() {
         PantallaRegistro(controladorNavegacion = rememberNavController())
     }
 }
-
