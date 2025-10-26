@@ -1,5 +1,6 @@
 package com.example.vidasalud.presentation.auth
 
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vidasalud.ui.navigation.RutasApp
@@ -28,6 +29,8 @@ class AuthViewModel : ViewModel() {
 
     private val _navigationEvent = MutableSharedFlow<String>()
     val navigationEvent = _navigationEvent.asSharedFlow()
+
+
 
     fun onEmailChange(email: String) {
         _uiState.update { it.copy(email = email, errorEmail = null) }
@@ -66,10 +69,16 @@ class AuthViewModel : ViewModel() {
         if (email.isBlank()) {
             _uiState.update { it.copy(errorEmail = "Campo obligatorio") }
             hayErrores = true
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            _uiState.update { it.copy(errorEmail = "Formato de email no válido") }
+            hayErrores = true
         }
 
         if (contrasena.isBlank()) {
             _uiState.update { it.copy(errorContrasena = "Campo obligatorio") }
+            hayErrores = true
+        } else if (contrasena.length < 6) {
+            _uiState.update { it.copy(errorContrasena = "Mínimo 6 caracteres") }
             hayErrores = true
         }
 
@@ -88,14 +97,23 @@ class AuthViewModel : ViewModel() {
             _uiState.update { it.copy(errorNombre = "Campo obligatorio") }
             hayErrores = true
         }
+
         if (state.email.isBlank()) {
             _uiState.update { it.copy(errorEmail = "Campo obligatorio") }
             hayErrores = true
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(state.email).matches()) {
+            _uiState.update { it.copy(errorEmail = "Formato de email no válido") }
+            hayErrores = true
         }
+
         if (state.contrasena.isBlank()) {
             _uiState.update { it.copy(errorContrasena = "Campo obligatorio") }
             hayErrores = true
+        } else if (state.contrasena.length < 6) {
+            _uiState.update { it.copy(errorContrasena = "Mínimo 6 caracteres") }
+            hayErrores = true
         }
+
         if (state.confirmarContrasena.isBlank()) {
             _uiState.update { it.copy(errorConfirmarContrasena = "Campo obligatorio") }
             hayErrores = true
