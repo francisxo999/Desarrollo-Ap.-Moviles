@@ -1,63 +1,104 @@
 package com.example.vidasalud.ui.screens.estadisticas
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.DirectionsWalk
-import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.filled.QueryStats
-import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.vidasalud.presentation.registro.RegistroViewModel
+import com.example.vidasalud.ui.screens.estadisticas.components.FormularioRegistro
 import com.example.vidasalud.ui.screens.estadisticas.components.TarjetaResumenEstadisticas
-import com.example.vidasalud.ui.theme.VidaSaludTheme
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 data class DatoResumen(val icono: ImageVector, val titulo: String, val valor: String, val unidad: String)
-val datosResumen = listOf(
-    DatoResumen(Icons.Default.DirectionsWalk, "Distancia", "5.2", "km"),
-    DatoResumen(Icons.Default.Timer, "Duración", "45", "min"),
-    DatoResumen(Icons.Default.QueryStats, "Pasos", "7,500", ""),
-    DatoResumen(Icons.Default.LocalFireDepartment, "Calorías", "350", "kcal"),
-)
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaEstadisticas() {
+fun PantallaEstadisticas(
+    viewModel: RegistroViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val showDatePicker = remember { mutableStateOf(false) }
+
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = uiState.fechaSeleccionada
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+    )
+
+    LaunchedEffect(uiState.mensajeExito, uiState.mensajeError) {
+        val mensaje = uiState.mensajeExito ?: uiState.mensajeError
+        mensaje?.let {
+            snackbarHostState.showSnackbar(message = it, duration = SnackbarDuration.Short)
+            viewModel.clearMessages()
+        }
+    }
+
+    if (showDatePicker.value) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker.value = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val selectedDate = Instant.ofEpochMilli(datePickerState.selectedDateMillis ?: 0L)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+                        viewModel.onFechaSeleccionada(selectedDate)
+                        showDatePicker.value = false
+                    }
+                ) {
+                    Text("Aceptar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker.value = false }) {
+                    Text("Cancelar")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    val registro = uiState.registroActual
+    val datosResumenDinamicos = remember(registro) {
+        listOf(
+            DatoResumen(Icons.Default.DirectionsWalk, "Pasos", registro.pasos?.toString() ?: "0", ""),
+            DatoResumen(Icons.Default.LocalFireDepartment, "Calorías", registro.calorias_consumidas?.toString() ?: "0", "kcal"),
+            DatoResumen(Icons.Default.MonitorWeight, "Peso", registro.peso_kg?.toString() ?: "0.0", "kg"),
+            DatoResumen(Icons.Default.Bedtime, "Sueño", registro.horas_sueno?.toString() ?: "0.0", "h"),
+        )
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Datos", fontWeight = FontWeight.Bold) },
                 actions = {
-                    IconButton(onClick = { /* TODO: Mostrar selector de fecha */ }) {
+                    Text(
+                        text = uiState.fechaSeleccionada.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(onClick = { showDatePicker.value = true }) {
                         Icon(Icons.Default.CalendarToday, contentDescription = "Seleccionar Fecha")
                     }
                 },
@@ -77,7 +118,8 @@ fun PantallaEstadisticas() {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
                 Box(
                     modifier = Modifier
@@ -86,24 +128,28 @@ fun PantallaEstadisticas() {
                         .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.medium),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Placeholder Gráfico", style = MaterialTheme.typography.bodyMedium)
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator()
+                    } else {
+                        Text("Placeholder Gráfico", style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = "Resumen del Entrenamiento",
+                    text = "Resumen del Día",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(200.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(datosResumen) { dato ->
+                    items(datosResumenDinamicos) { dato ->
                         TarjetaResumenEstadisticas(
                             icono = dato.icono,
                             titulo = dato.titulo,
@@ -112,15 +158,19 @@ fun PantallaEstadisticas() {
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                FormularioRegistro(
+                    registro = uiState.registroActual,
+                    onValueChange = viewModel::onRegistroChange,
+                    onGuardarClick = viewModel::guardarRegistro,
+                    isLoading = uiState.isLoading,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(100.dp))
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PantallaEstadisticasPreview() {
-    VidaSaludTheme {
-        PantallaEstadisticas()
     }
 }

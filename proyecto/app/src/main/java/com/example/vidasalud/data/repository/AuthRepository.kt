@@ -57,7 +57,7 @@ class AuthRepository {
     }
 
     suspend fun obtenerNombreUsuario(): String? {
-        val uid = auth.currentUser?.uid ?: return null // Si no hay usuario, devuelve null
+        val uid = auth.currentUser?.uid ?: return null
 
         return try {
             val documento = firestore.collection("usuarios").document(uid).get().await()
