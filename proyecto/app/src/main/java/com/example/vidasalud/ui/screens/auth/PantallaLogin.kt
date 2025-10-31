@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -86,7 +88,8 @@ fun PantallaLogin(
                 etiqueta = "Email",
                 esContrasena = false,
                 isError = uiState.errorEmail != null,
-                errorTexto = uiState.errorEmail
+                errorTexto = uiState.errorEmail,
+                enabled = !uiState.isLoading
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -97,8 +100,19 @@ fun PantallaLogin(
                 etiqueta = "Contraseña",
                 esContrasena = true,
                 isError = uiState.errorContrasena != null,
-                errorTexto = uiState.errorContrasena
+                errorTexto = uiState.errorContrasena,
+                enabled = !uiState.isLoading
             )
+
+            if (uiState.errorGeneral != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = uiState.errorGeneral!!,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -113,14 +127,22 @@ fun PantallaLogin(
                     containerColor = BotonOscuro,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.medium,
+                enabled = !uiState.isLoading
             ) {
-                Text(
-                    text = "Iniciar Sesión",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Bold
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
-                )
+                } else {
+                    Text(
+                        text = "Iniciar Sesión",
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -135,9 +157,12 @@ fun PantallaLogin(
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                TextButton(onClick = {
-                    controladorNavegacion.navigate(RutasApp.PantallaRegistro.ruta)
-                }) {
+                TextButton(
+                    onClick = {
+                        controladorNavegacion.navigate(RutasApp.PantallaRegistro.ruta)
+                    },
+                    enabled = !uiState.isLoading
+                ) {
                     Text(
                         text = "Regístrate",
                         style = MaterialTheme.typography.bodyMedium.copy(
@@ -150,6 +175,7 @@ fun PantallaLogin(
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

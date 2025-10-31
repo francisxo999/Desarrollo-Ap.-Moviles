@@ -77,7 +77,11 @@ fun PantallaPrincipalNavegacion(navControllerPrincipal: NavController) {
             composable(RutasPestañas.Resumen.ruta) { PantallaPrincipal() }
             composable(RutasPestañas.Estadisticas.ruta) { PantallaEstadisticas() }
             composable(RutasPestañas.Comunidad.ruta) { PantallaComunidad() }
-            composable(RutasPestañas.Perfil.ruta) { PantallaPerfil() }
+
+
+            composable(RutasPestañas.Perfil.ruta) {
+                PantallaPerfil(navControllerPrincipal = navControllerPrincipal)
+            }
         }
     }
 }

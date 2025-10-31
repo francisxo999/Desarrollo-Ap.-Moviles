@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -66,9 +68,12 @@ fun PantallaRegistro(
             TopAppBar(
                 title = { Text("") },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        controladorNavegacion.popBackStack()
-                    }) {
+                    IconButton(
+                        onClick = {
+                            controladorNavegacion.popBackStack()
+                        },
+                        enabled = !uiState.isLoading
+                    ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Volver a Login"
@@ -119,41 +124,49 @@ fun PantallaRegistro(
                     etiqueta = "Nombre",
                     esContrasena = false,
                     isError = uiState.errorNombre != null,
-                    errorTexto = uiState.errorNombre
+                    errorTexto = uiState.errorNombre,
+                    enabled = !uiState.isLoading
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
-
                 ComponenteTextField(
                     valor = uiState.email,
                     enValorCambiado = viewModel::onEmailChange,
                     etiqueta = "Email",
                     esContrasena = false,
                     isError = uiState.errorEmail != null,
-                    errorTexto = uiState.errorEmail
+                    errorTexto = uiState.errorEmail,
+                    enabled = !uiState.isLoading
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
-
                 ComponenteTextField(
                     valor = uiState.contrasena,
                     enValorCambiado = viewModel::onContrasenaChange,
                     etiqueta = "Contraseña",
                     esContrasena = true,
                     isError = uiState.errorContrasena != null,
-                    errorTexto = uiState.errorContrasena
+                    errorTexto = uiState.errorContrasena,
+                    enabled = !uiState.isLoading
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
-
                 ComponenteTextField(
                     valor = uiState.confirmarContrasena,
                     enValorCambiado = viewModel::onConfirmarContrasenaChange,
                     etiqueta = "Confirmar Contraseña",
                     esContrasena = true,
                     isError = uiState.errorConfirmarContrasena != null,
-                    errorTexto = uiState.errorConfirmarContrasena
+                    errorTexto = uiState.errorConfirmarContrasena,
+                    enabled = !uiState.isLoading
                 )
+
+                if (uiState.errorGeneral != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = uiState.errorGeneral!!,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(32.dp))
 
@@ -168,14 +181,23 @@ fun PantallaRegistro(
                         containerColor = BotonOscuro,
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
-                    shape = MaterialTheme.shapes.medium
+                    shape = MaterialTheme.shapes.medium,
+                    enabled = !uiState.isLoading
                 ) {
-                    Text(
-                        text = "Crear Cuenta",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Bold
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
-                    )
+                    } else {
+                        Text(
+                            text = "Crear Cuenta",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
+
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -190,9 +212,12 @@ fun PantallaRegistro(
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    TextButton(onClick = {
-                        controladorNavegacion.popBackStack()
-                    }) {
+                    TextButton(
+                        onClick = {
+                            controladorNavegacion.popBackStack()
+                        },
+                        enabled = !uiState.isLoading
+                    ) {
                         Text(
                             text = "Inicia Sesión",
                             style = MaterialTheme.typography.bodyMedium.copy(
@@ -206,7 +231,6 @@ fun PantallaRegistro(
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

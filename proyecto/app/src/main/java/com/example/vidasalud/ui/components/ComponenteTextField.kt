@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.vidasalud.ui.theme.BotonOscuro
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComponenteTextField(
@@ -25,7 +26,8 @@ fun ComponenteTextField(
     etiqueta: String,
     esContrasena: Boolean = false,
     isError: Boolean = false,
-    errorTexto: String? = null
+    errorTexto: String? = null,
+    enabled: Boolean = true
 ) {
     OutlinedTextField(
         value = valor,
@@ -34,6 +36,7 @@ fun ComponenteTextField(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         singleLine = true,
+        enabled = enabled,
         isError = isError,
         supportingText = {
             if (isError && errorTexto != null) {

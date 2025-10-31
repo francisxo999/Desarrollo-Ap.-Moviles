@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Fastfood
-import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,6 +22,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -29,11 +31,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.vidasalud.presentation.principal.ResumenViewModel
 import com.example.vidasalud.ui.theme.VidaSaludTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaPrincipal() {
+fun PantallaPrincipal(
+    viewModel: ResumenViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -44,7 +52,7 @@ fun PantallaPrincipal() {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Hola, [Nombre Usuario]",
+                text = "Hola, ${uiState.nombreUsuario}",
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -74,7 +82,6 @@ fun PantallaPrincipal() {
                 unidad = "",
                 icono = Icons.Default.Bedtime
             )
-
         }
     }
 }
@@ -91,7 +98,7 @@ fun TarjetaResumen(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        onClick = { /* TODO: Navegar a la pantalla detallada si es necesario */ }
+        onClick = {  }
     ) {
         Row(
             modifier = Modifier
