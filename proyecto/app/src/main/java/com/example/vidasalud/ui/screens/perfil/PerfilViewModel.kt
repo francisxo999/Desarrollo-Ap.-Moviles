@@ -34,14 +34,18 @@ class PerfilViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val document = usersCollection.document(uid).get().await()
-                val user = document.toObject(Usuario::class.java)?.copy(id = document.id)
-
-                val loadedUser = user ?: Usuario(
+                val firestoreUser = document.toObject(Usuario::class.java)
+                val authEmail = auth.currentUser?.email
+                val finalUser = firestoreUser?.copy(
+                    id = document.id,
                     uid = uid,
-                    correo = auth.currentUser?.email
+                    correo = authEmail
+                ) ?: Usuario(
+                    uid = uid,
+                    correo = authEmail
                 )
 
-                _uiState.update { it.copy(currentUser = loadedUser, isLoading = false) }
+                _uiState.update { it.copy(currentUser = finalUser, isLoading = false) }
 
             } catch (e: Exception) {
                 _uiState.update { it.copy(mensajeError = "Error al cargar perfil: ${e.message}", isLoading = false) }
