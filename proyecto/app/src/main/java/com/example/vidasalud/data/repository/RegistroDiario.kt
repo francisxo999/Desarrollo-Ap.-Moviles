@@ -2,15 +2,17 @@ package com.example.vidasalud.data.repository
 
 import com.google.firebase.firestore.DocumentId
 
+// Modelo de datos para un registro diario del usuario
 data class RegistroDiario(
-    @DocumentId val id: String? = null,
-    val userId: String = "",
-    val fecha: String = "",
-    val peso_kg: Double? = null,
-    val calorias_consumidas: Int? = null,
-    val horas_sueno: Double? = null,
-    val pasos: Int? = null,
+    @DocumentId val id: String? = null, // ID automático del documento en Firestore
+    val userId: String = "", // ID del usuario propietario del registro
+    val fecha: String = "", // Fecha del registro (string)
+    val peso_kg: Double? = null, // Peso del usuario en kg
+    val calorias_consumidas: Int? = null, // Calorías consumidas en el día
+    val horas_sueno: Double? = null, // Horas dormidas
+    val pasos: Int? = null, // Cantidad de pasos del día
 ) {
+    // Constructor vacío requerido por Firestore para deserializar datos
     constructor() : this(
         id = null,
         userId = "",

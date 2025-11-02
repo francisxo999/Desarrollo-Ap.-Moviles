@@ -1,5 +1,6 @@
 package com.example.vidasalud.ui.screens.estadisticas
 
+// Dependencias necesarias para UI, ViewModel y fecha
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -26,19 +27,20 @@ import java.time.format.DateTimeFormatter
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 
+// Modelo para mostrar los datos en tarjetas
 data class DatoResumen(val icono: ImageVector, val titulo: String, val valor: String, val unidad: String)
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaEstadisticas(
-    viewModel: RegistroViewModel = viewModel()
+    viewModel: RegistroViewModel = viewModel() // Obtiene el ViewModel
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val showDatePicker = remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsState() // Observa el estado UI
+    val snackbarHostState = remember { SnackbarHostState() } // Snackbar para mensajes
+    val showDatePicker = remember { mutableStateOf(false) } // Controla popup de fecha
 
+    // Estado inicial del date picker (fecha elegida)
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = uiState.fechaSeleccionada
             .atStartOfDay(ZoneId.systemDefault())
@@ -46,24 +48,27 @@ fun PantallaEstadisticas(
             .toEpochMilli()
     )
 
+    // Efecto para mostrar mensajes de éxito/error
     LaunchedEffect(uiState.mensajeExito, uiState.mensajeError) {
         val mensaje = uiState.mensajeExito ?: uiState.mensajeError
         mensaje?.let {
             snackbarHostState.showSnackbar(message = it, duration = SnackbarDuration.Short)
-            viewModel.clearMessages()
+            viewModel.clearMessages() // Limpia mensajes luego de mostrarlos
         }
     }
 
+    // Si se debe mostrar el selector de fecha
     if (showDatePicker.value) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker.value = false },
             confirmButton = {
                 TextButton(
                     onClick = {
+                        // Convierte milisegundos a fecha real
                         val selectedDate = Instant.ofEpochMilli(datePickerState.selectedDateMillis ?: 0L)
                             .atZone(ZoneId.systemDefault())
                             .toLocalDate()
-                        viewModel.onFechaSeleccionada(selectedDate)
+                        viewModel.onFechaSeleccionada(selectedDate) // Actualiza fecha en ViewModel
                         showDatePicker.value = false
                     }
                 ) {
@@ -76,13 +81,11 @@ fun PantallaEstadisticas(
                 }
             }
         ) {
-            DatePicker(state = datePickerState)
+            DatePicker(state = datePickerState) // Muestra selector visual
         }
     }
 
-    // CORREGIDO: (Error 1)
-    // Ya no existe 'registroActual'. Leemos los campos de 'uiState' directamente.
-    // Usamos '.ifEmpty' para mostrar un valor por defecto.
+    // Construye lista dinámica de estadísticas con valores actuales
     val datosResumenDinamicos = remember(uiState.pasos, uiState.calorias, uiState.peso, uiState.sueno) {
         listOf(
             DatoResumen(Icons.Default.DirectionsWalk, "Pasos", uiState.pasos.ifEmpty { "0" }, ""),
@@ -92,24 +95,25 @@ fun PantallaEstadisticas(
         )
     }
 
+    // Estructura principal de la pantalla
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Datos", fontWeight = FontWeight.Bold) },
+                title = { Text("Datos", fontWeight = FontWeight.Bold) }, // Título superior
                 actions = {
+                    // Mostrar la fecha actual seleccionada
                     Text(
                         text = uiState.fechaSeleccionada.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(onClick = { showDatePicker.value = true }) {
+                    IconButton(onClick = { showDatePicker.value = true }) { // Botón para seleccionar fecha
                         Icon(Icons.Default.CalendarToday, contentDescription = "Seleccionar Fecha")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         }
@@ -124,8 +128,10 @@ fun PantallaEstadisticas(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState()) // Scroll manual
             ) {
+
+                // Gráfico indicador (placeholder por ahora)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -136,7 +142,7 @@ fun PantallaEstadisticas(
                     if (uiState.isLoading) {
                         CircularProgressIndicator()
                     } else {
-                        Text("Placeholder Gráfico", style = MaterialTheme.typography.bodyMedium)
+                        Text("Placeholder Gráfico") // Texto temporal
                     }
                 }
 
@@ -148,6 +154,7 @@ fun PantallaEstadisticas(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
+                // Grid con tarjetas de resumen (2 columnas)
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxWidth().height(200.dp),
@@ -166,33 +173,26 @@ fun PantallaEstadisticas(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // CORREGIDO: (Errores 2 y 3)
-                // Ya no pasamos 'registroActual' ni 'onRegistroChange'.
-                // Ahora pasamos todos los valores, errores y funciones
-                // individualmente desde el ViewModel y el UiState.
+                // Formulario para ingresar datos diarios
                 FormularioRegistro(
-                    // Valores
                     peso = uiState.peso,
                     calorias = uiState.calorias,
                     sueno = uiState.sueno,
                     pasos = uiState.pasos,
-                    // Errores
                     errorPeso = uiState.errorPeso,
                     errorCalorias = uiState.errorCalorias,
                     errorSueno = uiState.errorSueno,
                     errorPasos = uiState.errorPasos,
-                    // Funciones del ViewModel
                     onPesoChange = viewModel::onPesoChange,
                     onCaloriasChange = viewModel::onCaloriasChange,
                     onSuenoChange = viewModel::onSuenoChange,
                     onPasosChange = viewModel::onPasosChange,
-                    // Acciones
-                    onGuardarClick = viewModel::guardarRegistro,
+                    onGuardarClick = viewModel::guardarRegistro, // Guarda datos
                     isLoading = uiState.isLoading,
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(100.dp))
+                Spacer(modifier = Modifier.height(100.dp)) // Espacio final
             }
         }
     }
