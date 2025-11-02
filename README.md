@@ -27,15 +27,6 @@ Permite a los usuarios registrarse y hacer seguimiento de sus métricas diarias 
 
 ---
 
-## 🚧 Trabajo en Progreso
-
-El foco de trabajo pendiente es la **Integración de Sensores de Salud**, incluyendo:
-
-* Conexión al **Contador de Pasos** del dispositivo.
-* Implementación de la API de **Health Connect** para obtener datos de actividad física.
-
----
-
 ## 🧠 Autores
 
 **Francisco Vera** | **Rodrigo Vargas**
