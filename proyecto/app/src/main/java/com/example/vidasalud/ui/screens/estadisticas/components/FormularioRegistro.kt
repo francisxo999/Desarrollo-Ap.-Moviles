@@ -3,6 +3,8 @@ package com.example.vidasalud.ui.screens.estadisticas.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DirectionsRun
+import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.*
@@ -10,15 +12,26 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.vidasalud.data.repository.RegistroDiario
-import androidx.compose.material.icons.filled.DirectionsRun
-import androidx.compose.material.icons.filled.Fastfood
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormularioRegistro(
-    registro: RegistroDiario,
-    onValueChange: (campo: String, valor: Any?) -> Unit,
+    // Valores de los campos
+    peso: String,
+    calorias: String,
+    sueno: String,
+    pasos: String,
+    // Errores de validación
+    errorPeso: String?,
+    errorCalorias: String?,
+    errorSueno: String?,
+    errorPasos: String?,
+    // Funciones 'onChange' del ViewModel
+    onPesoChange: (String) -> Unit,
+    onCaloriasChange: (String) -> Unit,
+    onSuenoChange: (String) -> Unit,
+    onPasosChange: (String) -> Unit,
+    // Acciones y estado
     onGuardarClick: () -> Unit,
     isLoading: Boolean,
     modifier: Modifier = Modifier
@@ -34,58 +47,75 @@ fun FormularioRegistro(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
+            // --- Campo de Peso ---
             OutlinedTextField(
-                value = registro.peso_kg?.toString() ?: "",
-                onValueChange = { newValue ->
-                    val valueDouble = newValue.toDoubleOrNull()
-                    onValueChange("peso", valueDouble)
-                },
+                value = peso,
+                onValueChange = onPesoChange, // Pasa el String directo al ViewModel
                 label = { Text("Peso (kg)") },
                 leadingIcon = { Icon(Icons.Default.MonitorWeight, contentDescription = "Peso") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                isError = errorPeso != null, // Se pone rojo si hay error
+                supportingText = { // Muestra el mensaje de error
+                    if (errorPeso != null) {
+                        Text(text = errorPeso)
+                    }
+                }
             )
             Spacer(modifier = Modifier.height(8.dp))
 
+            // --- Campo de Calorías ---
             OutlinedTextField(
-                value = registro.calorias_consumidas?.toString() ?: "",
-                onValueChange = { newValue ->
-                    val valueInt = newValue.toIntOrNull()
-                    onValueChange("calorias", valueInt)
-                },
+                value = calorias,
+                onValueChange = onCaloriasChange,
                 label = { Text("Calorías Consumidas (kcal)") },
                 leadingIcon = { Icon(Icons.Default.Fastfood, contentDescription = "Calorías") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                isError = errorCalorias != null,
+                supportingText = {
+                    if (errorCalorias != null) {
+                        Text(text = errorCalorias)
+                    }
+                }
             )
             Spacer(modifier = Modifier.height(8.dp))
 
+            // --- Campo de Sueño ---
             OutlinedTextField(
-                value = registro.horas_sueno?.toString() ?: "",
-                onValueChange = { newValue ->
-                    val valueDouble = newValue.toDoubleOrNull()
-                    onValueChange("sueno", valueDouble)
-                },
+                value = sueno,
+                onValueChange = onSuenoChange,
                 label = { Text("Horas de Sueño") },
                 leadingIcon = { Icon(Icons.Default.WbSunny, contentDescription = "Sueño") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                isError = errorSueno != null,
+                supportingText = {
+                    if (errorSueno != null) {
+                        Text(text = errorSueno)
+                    }
+                }
             )
             Spacer(modifier = Modifier.height(8.dp))
 
+            // --- Campo de Pasos ---
             OutlinedTextField(
-                value = registro.pasos?.toString() ?: "",
-                onValueChange = { newValue ->
-                    val valueInt = newValue.toIntOrNull()
-                    onValueChange("pasos", valueInt)
-                },
+                value = pasos,
+                onValueChange = onPasosChange,
                 label = { Text("Pasos (Manual)") },
                 leadingIcon = { Icon(Icons.Default.DirectionsRun, contentDescription = "Pasos") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                isError = errorPasos != null,
+                supportingText = {
+                    if (errorPasos != null) {
+                        Text(text = errorPasos)
+                    }
+                }
             )
             Spacer(modifier = Modifier.height(16.dp))
 
+            // --- Botón de Guardar ---
             Button(
                 onClick = onGuardarClick,
                 enabled = !isLoading,

@@ -1,5 +1,7 @@
 package com.example.vidasalud.ui.screens.estadisticas
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -27,6 +29,7 @@ import androidx.compose.foundation.verticalScroll
 data class DatoResumen(val icono: ImageVector, val titulo: String, val valor: String, val unidad: String)
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaEstadisticas(
@@ -77,13 +80,15 @@ fun PantallaEstadisticas(
         }
     }
 
-    val registro = uiState.registroActual
-    val datosResumenDinamicos = remember(registro) {
+    // CORREGIDO: (Error 1)
+    // Ya no existe 'registroActual'. Leemos los campos de 'uiState' directamente.
+    // Usamos '.ifEmpty' para mostrar un valor por defecto.
+    val datosResumenDinamicos = remember(uiState.pasos, uiState.calorias, uiState.peso, uiState.sueno) {
         listOf(
-            DatoResumen(Icons.Default.DirectionsWalk, "Pasos", registro.pasos?.toString() ?: "0", ""),
-            DatoResumen(Icons.Default.LocalFireDepartment, "Calorías", registro.calorias_consumidas?.toString() ?: "0", "kcal"),
-            DatoResumen(Icons.Default.MonitorWeight, "Peso", registro.peso_kg?.toString() ?: "0.0", "kg"),
-            DatoResumen(Icons.Default.Bedtime, "Sueño", registro.horas_sueno?.toString() ?: "0.0", "h"),
+            DatoResumen(Icons.Default.DirectionsWalk, "Pasos", uiState.pasos.ifEmpty { "0" }, ""),
+            DatoResumen(Icons.Default.LocalFireDepartment, "Calorías", uiState.calorias.ifEmpty { "0" }, "kcal"),
+            DatoResumen(Icons.Default.MonitorWeight, "Peso", uiState.peso.ifEmpty { "0.0" }, "kg"),
+            DatoResumen(Icons.Default.Bedtime, "Sueño", uiState.sueno.ifEmpty { "0.0" }, "h"),
         )
     }
 
@@ -161,9 +166,27 @@ fun PantallaEstadisticas(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // CORREGIDO: (Errores 2 y 3)
+                // Ya no pasamos 'registroActual' ni 'onRegistroChange'.
+                // Ahora pasamos todos los valores, errores y funciones
+                // individualmente desde el ViewModel y el UiState.
                 FormularioRegistro(
-                    registro = uiState.registroActual,
-                    onValueChange = viewModel::onRegistroChange,
+                    // Valores
+                    peso = uiState.peso,
+                    calorias = uiState.calorias,
+                    sueno = uiState.sueno,
+                    pasos = uiState.pasos,
+                    // Errores
+                    errorPeso = uiState.errorPeso,
+                    errorCalorias = uiState.errorCalorias,
+                    errorSueno = uiState.errorSueno,
+                    errorPasos = uiState.errorPasos,
+                    // Funciones del ViewModel
+                    onPesoChange = viewModel::onPesoChange,
+                    onCaloriasChange = viewModel::onCaloriasChange,
+                    onSuenoChange = viewModel::onSuenoChange,
+                    onPasosChange = viewModel::onPasosChange,
+                    // Acciones
                     onGuardarClick = viewModel::guardarRegistro,
                     isLoading = uiState.isLoading,
                     modifier = Modifier.fillMaxWidth()
