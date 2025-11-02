@@ -1,20 +1,21 @@
 [versions]
-agp = "8.13.0"
-kotlin = "2.0.21"
-coreKtx = "1.10.1"
-junit = "4.13.2"
-junitVersion = "1.1.5"
-espressoCore = "3.5.1"
-activityCompose = "1.9.0"
-composeBom = "2024.06.00"
-navigationCompose = "2.7.7"
-lifecycleViewmodelCompose = "2.8.3"
-lifecycleKtx = "2.8.3"
-kotlinComposePlugin = "2.0.21"
-googleMaterial = "1.12.0"
-materialIconsExtended = "1.6.8"
-googleGmsPlugin = "4.4.2"
-firebaseBom = "33.1.2"
+agp = "8.13.0"              # Plugin Android Gradle
+kotlin = "2.0.21"           # Versión de Kotlin
+coreKtx = "1.10.1"          # Extensiones KTX de Android
+junit = "4.13.2"            # JUnit pruebas unitarias
+junitVersion = "1.1.5"      # JUnit para pruebas instrumentadas
+espressoCore = "3.5.1"      # Espresso para UI tests
+activityCompose = "1.9.0"   # Activity para Compose
+composeBom = "2024.06.00"   # BOM Jetpack Compose
+navigationCompose = "2.7.7" # Navegación Compose
+lifecycleViewmodelCompose = "2.8.3" # ViewModel con Compose
+lifecycleKtx = "2.8.3"      # Librerías Lifecycle
+kotlinComposePlugin = "2.0.21" # Plugin Compose para Kotlin
+googleMaterial = "1.12.0"   # Material Components
+materialIconsExtended = "1.6.8" # Iconos extendidos Material
+googleGmsPlugin = "4.4.2"   # Plugin Google Services (Firebase)
+firebaseBom = "33.1.2"      # BOM Firebase
+desugarJdkLibs = "2.0.4"    # Desugar para APIs modernas de Java
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,10 +39,10 @@ google-material = { group = "com.google.android.material", name = "material", ve
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
+desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 
 [plugins]
-android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinComposePlugin" }
-
-google-gms-plugin = { id = "com.google.gms.google-services", version.ref = "googleGmsPlugin" }
+android-application = { id = "com.android.application", version.ref = "agp" } # Plugin app Android
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" } # Kotlin para Android
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinComposePlugin" } # Soporte Compose
+google-gms-plugin = { id = "com.google.gms.google-services", version.ref = "googleGmsPlugin" } # Google/Firebase services

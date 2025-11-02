@@ -49,31 +49,41 @@ fun PantallaPerfil(
     navControllerPrincipal: NavController,
     viewModel: PerfilViewModel = viewModel()
 ) {
+    // Estado actualizado del perfil
     val uiState by viewModel.uiState.collectAsState()
     val user = uiState.currentUser
     val context = LocalContext.current
 
+    // Launcher para seleccionar imagen desde la galería
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri: Uri? ->
             uri?.let {
+                // Intenta obtener permiso persistente para leer la imagen
                 try {
-                    context.contentResolver.takePersistableUriPermission(it, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    context.contentResolver.takePersistableUriPermission(
+                        it,
+                        android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
 
+                // Actualiza la foto de perfil en el ViewModel (y Firebase/Firestore)
                 viewModel.actualizarFotoPerfil(it.toString())
             }
         }
     )
 
+    // Contenedor principal de la pantalla
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        // Título de pantalla
         Text(
             text = "Perfil de Usuario",
             style = MaterialTheme.typography.headlineSmall,
@@ -82,69 +92,96 @@ fun PantallaPerfil(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        if (uiState.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.padding(32.dp))
-        } else if (user != null) {
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .clickable {
-                        imagePickerLauncher.launch("image/*")
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                if (user.fotoPerfilUrl.isNullOrEmpty()) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Foto de perfil",
-                        modifier = Modifier.size(80.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                } else {
-                    AsyncImage(
-                        model = user.fotoPerfilUrl,
-                        contentDescription = "Foto de perfil",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-                Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = "Cambiar foto",
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(4.dp)
-                        .background(MaterialTheme.colorScheme.surface, CircleShape)
-                        .clip(CircleShape)
-                        .size(30.dp)
-                        .padding(4.dp),
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
+        when {
+            // Loading mientras se carga info o imagen
+            uiState.isLoading -> {
+                CircularProgressIndicator(modifier = Modifier.padding(32.dp))
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Si hay usuario, mostrar info
+            user != null -> {
+                // Foto de perfil clickeable para cambiarla
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .clickable {
+                            // Abrir selector de imágenes
+                            imagePickerLauncher.launch("image/*")
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Si no hay foto subida, mostrar icono por defecto
+                    if (user.fotoPerfilUrl.isNullOrEmpty()) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Foto de perfil",
+                            modifier = Modifier.size(80.dp),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    } else {
+                        // Mostrar foto cargada
+                        AsyncImage(
+                            model = user.fotoPerfilUrl,
+                            contentDescription = "Foto de perfil",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
 
-            Card(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Nombre: ${user.nombre ?: "Usuario"}", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Correo: ${user.correo ?: "N/A"}", style = MaterialTheme.typography.titleSmall)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("UID: ${user.uid}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                    // Ícono de cámara sobrepuesto para indicar edición
+                    Icon(
+                        imageVector = Icons.Default.CameraAlt,
+                        contentDescription = "Cambiar foto",
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(4.dp)
+                            .background(MaterialTheme.colorScheme.surface, CircleShape)
+                            .clip(CircleShape)
+                            .size(30.dp)
+                            .padding(4.dp),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Tarjeta con datos del usuario
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            "Nombre: ${user.nombre ?: "Usuario"}",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "Correo: ${user.correo ?: "N/A"}",
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "UID: ${user.uid}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
                 }
             }
         }
 
         Spacer(modifier = Modifier.weight(1f))
 
+        // Botón para cerrar sesión
         Button(
             onClick = {
                 FirebaseAuth.getInstance().signOut()
+                // Regresa a pantalla de bienvenida limpiando stack
                 navControllerPrincipal.navigate(RutasApp.PantallaBienvenida.ruta) {
                     popUpTo(0) { inclusive = true }
                     launchSingleTop = true

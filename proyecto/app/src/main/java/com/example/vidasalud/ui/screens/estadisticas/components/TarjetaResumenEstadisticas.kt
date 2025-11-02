@@ -1,5 +1,6 @@
 package com.example.vidasalud.ui.screens.estadisticas.components
 
+// Importaciones necesarias para crear el layout y estilos visuales
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,35 +22,51 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun TarjetaResumenEstadisticas(
+    // Ícono representativo de la estadística (ej: peso, pasos, etc.)
     icono: ImageVector,
+    // Texto principal (ej: "Peso", "Pasos")
     titulo: String,
+    // Valor numérico o texto a mostrar (ej: "75", "10.000")
     valor: String,
+    // Unidad asociada al valor (ej: "kg", "pasos", "hrs")
     unidad: String
 ) {
+    // Contenedor tipo tarjeta para mostrar la estadística
     Card(
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        modifier = Modifier.padding(vertical = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), // Sombra ligera
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant), // Fondo suave
+        modifier = Modifier.padding(vertical = 4.dp) // Espaciado vertical
     ) {
+        // Fila que contiene ícono y texto alineados horizontalmente
         Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(12.dp), // Espaciado interno
+            verticalAlignment = Alignment.CenterVertically // Alineación vertical centrada
         ) {
+            // Ícono de la categoría de estadística
             Icon(
                 imageVector = icono,
-                contentDescription = titulo,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp)
+                contentDescription = titulo, // Accesibilidad
+                tint = MaterialTheme.colorScheme.primary, // Color basado en el tema
+                modifier = Modifier.size(32.dp) // Tamaño del ícono
             )
-            Spacer(modifier = Modifier.width(12.dp))
+
+            Spacer(modifier = Modifier.width(12.dp)) // Espacio entre ícono y texto
+
+            // Columna que contiene título y valor
             Column {
+                // Título de la estadística
                 Text(
                     text = titulo,
                     style = MaterialTheme.typography.labelMedium
                 )
+
+                // Valor y unidad, con estilo destacado
                 Text(
-                    text = "$valor ${unidad.lowercase()}",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    text = "$valor ${unidad.lowercase()}", // Formato "75 kg"
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
                 )
             }
         }
