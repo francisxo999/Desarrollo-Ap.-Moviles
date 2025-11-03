@@ -2,6 +2,7 @@ package com.example.vidasalud.ui.screens.estadisticas
 
 // Dependencias necesarias para UI, ViewModel y fecha
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -39,6 +41,7 @@ fun PantallaEstadisticas(
     val uiState by viewModel.uiState.collectAsState() // Observa el estado UI
     val snackbarHostState = remember { SnackbarHostState() } // Snackbar para mensajes
     val showDatePicker = remember { mutableStateOf(false) } // Controla popup de fecha
+    val context = LocalContext.current
 
     // Estado inicial del date picker (fecha elegida)
     val datePickerState = rememberDatePickerState(
@@ -46,6 +49,7 @@ fun PantallaEstadisticas(
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
             .toEpochMilli()
+        // No usamos 'dateValidator'
     )
 
     // Efecto para mostrar mensajes de éxito/error
@@ -64,12 +68,27 @@ fun PantallaEstadisticas(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        // Convierte milisegundos a fecha real
+                        // 1. Obtener la fecha seleccionada
                         val selectedDate = Instant.ofEpochMilli(datePickerState.selectedDateMillis ?: 0L)
                             .atZone(ZoneId.systemDefault())
                             .toLocalDate()
-                        viewModel.onFechaSeleccionada(selectedDate) // Actualiza fecha en ViewModel
-                        showDatePicker.value = false
+
+                        // 2. Obtener la fecha de hoy
+                        val today = LocalDate.now()
+
+                        // 3. Comparar las fechas
+                        if (selectedDate.isAfter(today)) {
+                            // 4. Si es una fecha futura, mostrar error y NO cerrar
+                            Toast.makeText(
+                                context,
+                                "No puedes seleccionar una fecha futura.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            // 5. Si la fecha es válida, actualizar y cerrar
+                            viewModel.onFechaSeleccionada(selectedDate) // Actualiza fecha en ViewModel
+                            showDatePicker.value = false
+                        }
                     }
                 ) {
                     Text("Aceptar")
