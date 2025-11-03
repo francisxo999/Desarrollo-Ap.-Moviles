@@ -1,31 +1,12 @@
 package com.example.vidasalud.ui.screens.auth
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -42,11 +23,14 @@ fun PantallaLogin(
     controladorNavegacion: NavController,
     viewModel: AuthViewModel = viewModel()
 ) {
+    // Estado de UI expuesto desde el ViewModel (email, pass, errores, loading, etc)
     val uiState by viewModel.uiState.collectAsState()
 
+    // Escucha eventos de navegación emitidos por el ViewModel
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { ruta ->
             controladorNavegacion.navigate(ruta) {
+                // Limpia pantallas anteriores para evitar volver atrás
                 popUpTo(RutasApp.PantallaBienvenida.ruta) {
                     inclusive = true
                 }
@@ -54,6 +38,7 @@ fun PantallaLogin(
         }
     }
 
+    // UI Principal
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -65,6 +50,7 @@ fun PantallaLogin(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Título
             Text(
                 text = "¡Bienvenido de Nuevo!",
                 style = MaterialTheme.typography.titleLarge.copy(
@@ -73,6 +59,7 @@ fun PantallaLogin(
                     textAlign = TextAlign.Center
                 )
             )
+            // Subtítulo
             Text(
                 text = "Inicia sesión para continuar",
                 style = MaterialTheme.typography.bodyLarge,
@@ -82,6 +69,7 @@ fun PantallaLogin(
 
             Spacer(modifier = Modifier.height(48.dp))
 
+            // Campo de Email
             ComponenteTextField(
                 valor = uiState.email,
                 enValorCambiado = viewModel::onEmailChange,
@@ -94,6 +82,7 @@ fun PantallaLogin(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Campo de contraseña
             ComponenteTextField(
                 valor = uiState.contrasena,
                 enValorCambiado = viewModel::onContrasenaChange,
@@ -104,6 +93,7 @@ fun PantallaLogin(
                 enabled = !uiState.isLoading
             )
 
+            // Muestra error general si existe
             if (uiState.errorGeneral != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
@@ -116,9 +106,10 @@ fun PantallaLogin(
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            // Botón de inicio de sesión
             Button(
                 onClick = {
-                    viewModel.onLoginClicked()
+                    viewModel.onLoginClicked() // Llama al método de login
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -128,8 +119,9 @@ fun PantallaLogin(
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 shape = MaterialTheme.shapes.medium,
-                enabled = !uiState.isLoading
+                enabled = !uiState.isLoading // Deshabilita si está cargando
             ) {
+                // Si está cargando, mostrar loader
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
@@ -147,6 +139,7 @@ fun PantallaLogin(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Enlace a registro
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -173,14 +166,5 @@ fun PantallaLogin(
                 }
             }
         }
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun PantallaLoginPreview() {
-    VidaSaludTheme {
-        PantallaLogin(controladorNavegacion = rememberNavController())
     }
 }

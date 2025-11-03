@@ -51,13 +51,14 @@ fun PantallaRegistro(
     controladorNavegacion: NavController,
     viewModel: AuthViewModel = viewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState() // Observa el estado del ViewModel
 
     LaunchedEffect(Unit) {
+        // Escucha eventos para navegar tras registro exitoso
         viewModel.navigationEvent.collect { ruta ->
             controladorNavegacion.navigate(ruta) {
                 popUpTo(RutasApp.PantallaBienvenida.ruta) {
-                    inclusive = true
+                    inclusive = true // Elimina pantallas previas del stack
                 }
             }
         }
@@ -66,13 +67,13 @@ fun PantallaRegistro(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("") },
+                title = { Text("") }, // Barra sin título
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            controladorNavegacion.popBackStack()
+                            controladorNavegacion.popBackStack() // Regresa a pantalla anterior
                         },
-                        enabled = !uiState.isLoading
+                        enabled = !uiState.isLoading // Deshabilita si está cargando
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
@@ -91,13 +92,13 @@ fun PantallaRegistro(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(paddingValues), // Respeta barra superior
             color = MaterialTheme.colorScheme.background
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 24.dp),
+                    .padding(horizontal = 24.dp), // Márgenes laterales
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -118,6 +119,7 @@ fun PantallaRegistro(
 
                 Spacer(modifier = Modifier.height(48.dp))
 
+                // Campo Nombre
                 ComponenteTextField(
                     valor = uiState.nombre,
                     enValorCambiado = viewModel::onNombreChange,
@@ -127,7 +129,10 @@ fun PantallaRegistro(
                     errorTexto = uiState.errorNombre,
                     enabled = !uiState.isLoading
                 )
+
                 Spacer(modifier = Modifier.height(16.dp))
+
+                // Campo Email
                 ComponenteTextField(
                     valor = uiState.email,
                     enValorCambiado = viewModel::onEmailChange,
@@ -137,7 +142,10 @@ fun PantallaRegistro(
                     errorTexto = uiState.errorEmail,
                     enabled = !uiState.isLoading
                 )
+
                 Spacer(modifier = Modifier.height(16.dp))
+
+                // Campo Contraseña
                 ComponenteTextField(
                     valor = uiState.contrasena,
                     enValorCambiado = viewModel::onContrasenaChange,
@@ -147,7 +155,10 @@ fun PantallaRegistro(
                     errorTexto = uiState.errorContrasena,
                     enabled = !uiState.isLoading
                 )
+
                 Spacer(modifier = Modifier.height(16.dp))
+
+                // Campo Confirmar contraseña
                 ComponenteTextField(
                     valor = uiState.confirmarContrasena,
                     enValorCambiado = viewModel::onConfirmarContrasenaChange,
@@ -158,6 +169,7 @@ fun PantallaRegistro(
                     enabled = !uiState.isLoading
                 )
 
+                // Muestra error general
                 if (uiState.errorGeneral != null) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
@@ -170,10 +182,9 @@ fun PantallaRegistro(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
+                // Botón crear cuenta
                 Button(
-                    onClick = {
-                        viewModel.onRegistroClicked()
-                    },
+                    onClick = { viewModel.onRegistroClicked() }, // Ejecuta registro
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
@@ -197,33 +208,28 @@ fun PantallaRegistro(
                             )
                         )
                     }
-
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // Enlace para ir al login
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "¿Ya tienes una cuenta?",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Text(text = "¿Ya tienes una cuenta?")
+
                     Spacer(modifier = Modifier.width(4.dp))
+
                     TextButton(
-                        onClick = {
-                            controladorNavegacion.popBackStack()
-                        },
+                        onClick = { controladorNavegacion.popBackStack() },
                         enabled = !uiState.isLoading
                     ) {
                         Text(
                             text = "Inicia Sesión",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }

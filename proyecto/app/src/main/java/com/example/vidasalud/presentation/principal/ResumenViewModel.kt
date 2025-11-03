@@ -8,28 +8,30 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+// Estado para la pantalla de resumen principal
 data class ResumenUiState(
-    val nombreUsuario: String = "..."
+    val nombreUsuario: String = "..." // Nombre que se mostrará en la pantalla
 )
 
 class ResumenViewModel : ViewModel() {
 
-    private val authRepository = AuthRepository()
+    private val authRepository = AuthRepository() // Fuente para obtener datos del usuario
 
-    private val _uiState = MutableStateFlow(ResumenUiState())
-    val uiState = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(ResumenUiState()) // Estado interno mutable
+    val uiState = _uiState.asStateFlow() // Estado expuesto a la UI
 
     init {
-        cargarNombreUsuario()
+        cargarNombreUsuario() // Cargar el nombre al crear el ViewModel
     }
 
+    // Obtiene el nombre del usuario desde Firebase
     private fun cargarNombreUsuario() {
         viewModelScope.launch {
             val nombre = authRepository.obtenerNombreUsuario()
             if (nombre != null) {
-                _uiState.update { it.copy(nombreUsuario = nombre) }
+                _uiState.update { it.copy(nombreUsuario = nombre) } // Si existe, mostrarlo
             } else {
-                _uiState.update { it.copy(nombreUsuario = "Usuario") }
+                _uiState.update { it.copy(nombreUsuario = "Usuario") } // Nombre por defecto
             }
         }
     }

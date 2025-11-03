@@ -31,40 +31,40 @@ import com.example.vidasalud.ui.theme.BotonOscuro
 fun PantallaBienvenida(controladorNavegacion: NavController) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+            .fillMaxSize() // Ocupa toda la pantalla
+            .padding(16.dp), // Espaciado exterior
+        horizontalAlignment = Alignment.CenterHorizontally, // Centra horizontal
+        verticalArrangement = Arrangement.SpaceBetween // Espacia elementos verticalmente
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.height(60.dp)) // Espacio arriba
 
             Image(
                 painter = painterResource(id = R.drawable.img_onboarding),
-                contentDescription = "Persona mejorando su bienestar",
+                contentDescription = "Persona mejorando su bienestar", // Texto accesibilidad
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .height(320.dp),
-                contentScale = ContentScale.Fit
+                    .fillMaxWidth(0.9f) // Imagen ocupa 90% del ancho
+                    .height(320.dp), // Altura fija
+                contentScale = ContentScale.Fit // Ajusta imagen sin recortar
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(40.dp)) // Separación
 
             Text(
-                text = "Mejora tu Bienestar Cada Día",
+                text = "Mejora tu Bienestar Cada Día", // Título principal
                 fontWeight = FontWeight.Bold,
                 fontSize = 28.sp,
                 textAlign = TextAlign.Center,
-                lineHeight = 36.sp
+                lineHeight = 36.sp // Altura entre líneas
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Descubre una nueva forma de cuidarte con VidaSalud.",
+                text = "Descubre una nueva forma de cuidarte con VidaSalud.", // Subtítulo
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
-                color = Color.Gray,
+                color = Color.Gray, // Texto gris para contraste
                 fontWeight = FontWeight.Normal
             )
         }
@@ -74,29 +74,29 @@ fun PantallaBienvenida(controladorNavegacion: NavController) {
 
             Button(
                 onClick = {
+                    // Navega a pantalla de Login y limpia el stack
                     controladorNavegacion.navigate(RutasApp.PantallaLogin.ruta) {
                         popUpTo(RutasApp.PantallaBienvenida.ruta) {
-                            inclusive = true
+                            inclusive = true // Elimina pantalla de bienvenida del historial
                         }
                     }
                 },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
+                    .fillMaxWidth() // Botón ancho completo
+                    .height(50.dp), // Altura del botón
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = BotonOscuro,
-                    contentColor = Color.White
+                    containerColor = BotonOscuro, // Color del botón
+                    contentColor = Color.White // Color del texto
                 ),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp) // Bordes redondeados
             ) {
                 Text(
-                    text = "Comenzar",
+                    text = "Comenzar", // Texto del botón
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(20.dp)) // Espacio final
         }
     }
 }
-

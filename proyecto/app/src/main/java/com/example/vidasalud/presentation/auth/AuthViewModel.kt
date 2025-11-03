@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+// Estado de la pantalla de autenticación
 data class AuthUiState(
     val email: String = "",
     val contrasena: String = "",
@@ -27,17 +28,20 @@ data class AuthUiState(
 
 class AuthViewModel : ViewModel() {
 
-    private val authRepository = AuthRepository()
+    private val authRepository = AuthRepository() // Repositorio para Firebase Auth
 
-    private val _uiState = MutableStateFlow(AuthUiState())
-    val uiState = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(AuthUiState()) // Estado mutable
+    val uiState = _uiState.asStateFlow() // Estado público inmutable
 
-    private val _navigationEvent = MutableSharedFlow<String>()
+    private val _navigationEvent = MutableSharedFlow<String>() // Eventos de navegación
     val navigationEvent = _navigationEvent.asSharedFlow()
 
+    // Actualiza email
     fun onEmailChange(email: String) {
         _uiState.update { it.copy(email = email, errorEmail = null, errorGeneral = null) }
     }
+
+    // Actualiza contraseña
     fun onContrasenaChange(contrasena: String) {
         _uiState.update {
             it.copy(
@@ -48,9 +52,13 @@ class AuthViewModel : ViewModel() {
             )
         }
     }
+
+    // Actualiza nombre
     fun onNombreChange(nombre: String) {
         _uiState.update { it.copy(nombre = nombre, errorNombre = null, errorGeneral = null) }
     }
+
+    // Actualiza confirmación de contraseña
     fun onConfirmarContrasenaChange(contrasena: String) {
         _uiState.update {
             it.copy(
@@ -61,8 +69,9 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    // Acción botón "Iniciar sesión"
     fun onLoginClicked() {
-        if (!validarCamposLogin()) return
+        if (!validarCamposLogin()) return // Valida campos
 
         _uiState.update { it.copy(isLoading = true, errorGeneral = null) }
 
@@ -73,7 +82,7 @@ class AuthViewModel : ViewModel() {
             )
             when (resultado) {
                 is ResultadoAuth.Exito -> {
-                    _navigationEvent.emit(RutasApp.PantallaPrincipal.ruta)
+                    _navigationEvent.emit(RutasApp.PantallaPrincipal.ruta) // Navegar a pantalla principal
                 }
                 is ResultadoAuth.Error -> {
                     _uiState.update { it.copy(isLoading = false, errorGeneral = resultado.mensaje) }
@@ -82,8 +91,9 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    // Acción botón "Registrar"
     fun onRegistroClicked() {
-        if (!validarCamposRegistro()) return
+        if (!validarCamposRegistro()) return // Valida campos
 
         _uiState.update { it.copy(isLoading = true, errorGeneral = null) }
 
@@ -95,7 +105,7 @@ class AuthViewModel : ViewModel() {
             )
             when (resultado) {
                 is ResultadoAuth.Exito -> {
-                    _navigationEvent.emit(RutasApp.PantallaPrincipal.ruta)
+                    _navigationEvent.emit(RutasApp.PantallaPrincipal.ruta) // Navegar a inicio
                 }
                 is ResultadoAuth.Error -> {
                     _uiState.update { it.copy(isLoading = false, errorGeneral = resultado.mensaje) }
@@ -104,10 +114,12 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    // Valida formato email con regex
     private fun esEmailValido(email: String): Boolean {
         return Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\$").matches(email)
     }
 
+    // Validación de inicio de sesión
     private fun validarCamposLogin(): Boolean {
         val email = _uiState.value.email
         val contrasena = _uiState.value.contrasena
@@ -132,6 +144,7 @@ class AuthViewModel : ViewModel() {
         return !hayErrores
     }
 
+    // Validación de formulario de registro
     private fun validarCamposRegistro(): Boolean {
         val state = _uiState.value
         var hayErrores = false

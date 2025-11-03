@@ -2,7 +2,7 @@ package com.example.vidasalud.ui.screens.estadisticas
 
 // Dependencias necesarias para UI, ViewModel y fecha
 import android.os.Build
-import android.widget.Toast // <-- 1. IMPORTACIÓN AÑADIDA
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,7 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext // <-- 2. IMPORTACIÓN AÑADIDA
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,9 +41,6 @@ fun PantallaEstadisticas(
     val uiState by viewModel.uiState.collectAsState() // Observa el estado UI
     val snackbarHostState = remember { SnackbarHostState() } // Snackbar para mensajes
     val showDatePicker = remember { mutableStateOf(false) } // Controla popup de fecha
-
-    // --- 3. CONTEXTO AÑADIDO ---
-    // Necesitamos el 'context' para poder mostrar el mensaje de Toast
     val context = LocalContext.current
 
     // Estado inicial del date picker (fecha elegida)
@@ -70,7 +67,6 @@ fun PantallaEstadisticas(
             onDismissRequest = { showDatePicker.value = false },
             confirmButton = {
                 TextButton(
-                    // --- 4. LÓGICA DE VALIDACIÓN AÑADIDA ---
                     onClick = {
                         // 1. Obtener la fecha seleccionada
                         val selectedDate = Instant.ofEpochMilli(datePickerState.selectedDateMillis ?: 0L)
@@ -94,7 +90,6 @@ fun PantallaEstadisticas(
                             showDatePicker.value = false
                         }
                     }
-                    // --- FIN DE LA MODIFICACIÓN ---
                 ) {
                     Text("Aceptar")
                 }

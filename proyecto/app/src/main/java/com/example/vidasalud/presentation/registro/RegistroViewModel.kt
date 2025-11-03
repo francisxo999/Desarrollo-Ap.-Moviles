@@ -20,40 +20,40 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 class RegistroViewModel : ViewModel() {
 
-    private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
-    private val registrosCollection = db.collection("registros_diarios")
-    private val userId = auth.currentUser?.uid
+    private val auth = FirebaseAuth.getInstance() // Firebase Auth para obtener usuario
+    private val db = FirebaseFirestore.getInstance() // Firestore
+    private val registrosCollection = db.collection("registros_diarios") // Colección de registros diarios
+    private val userId = auth.currentUser?.uid // UID del usuario actual
 
-    private val _uiState = MutableStateFlow(RegistroUiState())
-    val uiState: StateFlow<RegistroUiState> = _uiState
+    private val _uiState = MutableStateFlow(RegistroUiState()) // Estado interno
+    val uiState: StateFlow<RegistroUiState> = _uiState // Estado expuesto a la UI
 
     init {
-        cargarRegistroDiario(LocalDate.now())
+        cargarRegistroDiario(LocalDate.now()) // Cargar registro del día actual al iniciar
     }
 
+    // Actualiza fecha seleccionada y carga datos
     fun onFechaSeleccionada(fecha: LocalDate) {
         if (fecha == _uiState.value.fechaSeleccionada) return
         _uiState.update { it.copy(fechaSeleccionada = fecha) }
         cargarRegistroDiario(fecha)
     }
 
+    // Métodos para actualizar campos y limpiar errores
     fun onPesoChange(valor: String) {
         _uiState.update { it.copy(peso = valor, errorPeso = null, mensajeError = null, mensajeExito = null) }
     }
-
     fun onCaloriasChange(valor: String) {
         _uiState.update { it.copy(calorias = valor, errorCalorias = null, mensajeError = null, mensajeExito = null) }
     }
-
     fun onSuenoChange(valor: String) {
         _uiState.update { it.copy(sueno = valor, errorSueno = null, mensajeError = null, mensajeExito = null) }
     }
-
     fun onPasosChange(valor: String) {
         _uiState.update { it.copy(pasos = valor, errorPasos = null, mensajeError = null, mensajeExito = null) }
     }
 
+    // Cargar registro desde Firestore según fecha
     private fun cargarRegistroDiario(fecha: LocalDate) {
         if (userId == null) {
             _uiState.update { it.copy(mensajeError = "Usuario no autenticado.") }
@@ -73,7 +73,7 @@ class RegistroViewModel : ViewModel() {
                     .await()
 
                 if (querySnapshot.isEmpty) {
-                    // No hay registro: resetea los campos
+                    // Si no existe registro para la fecha, limpiar campos
                     _uiState.update {
                         it.copy(
                             registroId = null,
@@ -85,7 +85,7 @@ class RegistroViewModel : ViewModel() {
                         )
                     }
                 } else {
-                    // Encontró un registro: carga los datos en los campos String
+                    // Si existe, cargar datos en campos
                     val document = querySnapshot.documents.first()
                     val registro = document.toObject(RegistroDiario::class.java)
                     _uiState.update {
@@ -107,23 +107,20 @@ class RegistroViewModel : ViewModel() {
         }
     }
 
+    // Guarda o actualiza el registro en Firestore
     fun guardarRegistro() {
         if (userId == null) {
             _uiState.update { it.copy(mensajeError = "Error: Usuario no autenticado.") }
             return
         }
 
-        // 1. Validar los campos antes de guardar
-        if (!validarFormulario()) {
-            return // Detener si la validación falla
-        }
+        if (!validarFormulario()) return // Validaciones
 
         _uiState.update { it.copy(isLoading = true, mensajeError = null, mensajeExito = null) }
 
-        // 2. Construir el objeto Modelo (RegistroDiario) desde los Strings
         val state = _uiState.value
         val registro = RegistroDiario(
-            id = state.registroId, // ID del documento para saber si es 'set' o 'add'
+            id = state.registroId,
             userId = userId,
             fecha = state.fechaSeleccionada.format(DateTimeFormatter.ISO_DATE),
             peso_kg = state.peso.toDoubleOrNull(),
@@ -132,7 +129,6 @@ class RegistroViewModel : ViewModel() {
             pasos = state.pasos.toIntOrNull()
         )
 
-        // 3. Guardar en Firestore
         viewModelScope.launch {
             try {
                 if (registro.id == null) {
@@ -140,7 +136,7 @@ class RegistroViewModel : ViewModel() {
                     val result = registrosCollection.add(registro).await()
                     _uiState.update {
                         it.copy(
-                            registroId = result.id, // Guardar el nuevo ID
+                            registroId = result.id,
                             mensajeExito = "Registro guardado exitosamente.",
                             isLoading = false
                         )
@@ -157,14 +153,13 @@ class RegistroViewModel : ViewModel() {
         }
     }
 
+    // Validaciones de los campos del formulario
     private fun validarFormulario(): Boolean {
         val state = _uiState.value
         var hayErrores = false
 
-        // Limpiar errores antiguos
         _uiState.update { it.copy(errorPeso = null, errorCalorias = null, errorSueno = null, errorPasos = null) }
 
-        // --- 1. Validación de Peso ---
         if (state.peso.isNotBlank()) {
             val pesoNum = state.peso.toDoubleOrNull()
             if (pesoNum == null) {
@@ -173,13 +168,12 @@ class RegistroViewModel : ViewModel() {
             } else if (pesoNum <= 0) {
                 _uiState.update { it.copy(errorPeso = "Debe ser un valor positivo") }
                 hayErrores = true
-            } else if (pesoNum > 400) { // <-- NUEVA REGLA
+            } else if (pesoNum > 400) {
                 _uiState.update { it.copy(errorPeso = "Valor irreal (max 400kg)") }
                 hayErrores = true
             }
         }
 
-        // --- 2. Validación de Calorías ---
         if (state.calorias.isNotBlank()) {
             val caloriasNum = state.calorias.toIntOrNull()
             if (caloriasNum == null) {
@@ -188,13 +182,12 @@ class RegistroViewModel : ViewModel() {
             } else if (caloriasNum < 0) {
                 _uiState.update { it.copy(errorCalorias = "No puede ser negativo") }
                 hayErrores = true
-            } else if (caloriasNum > 20000) { // <-- NUEVA REGLA
+            } else if (caloriasNum > 20000) {
                 _uiState.update { it.copy(errorCalorias = "Valor irreal (max 20,000)") }
                 hayErrores = true
             }
         }
 
-        // --- 3. Validación de Sueño ---
         if (state.sueno.isNotBlank()) {
             val suenoNum = state.sueno.toDoubleOrNull()
             if (suenoNum == null) {
@@ -203,13 +196,12 @@ class RegistroViewModel : ViewModel() {
             } else if (suenoNum <= 0) {
                 _uiState.update { it.copy(errorSueno = "Debe ser un valor positivo") }
                 hayErrores = true
-            } else if (suenoNum > 24) { // (Regla ya existente)
+            } else if (suenoNum > 24) {
                 _uiState.update { it.copy(errorSueno = "Máximo 24 horas") }
                 hayErrores = true
             }
         }
 
-        // --- 4. Validación de Pasos ---
         if (state.pasos.isNotBlank()) {
             val pasosNum = state.pasos.toIntOrNull()
             if (pasosNum == null) {
@@ -224,9 +216,10 @@ class RegistroViewModel : ViewModel() {
             }
         }
 
-        return !hayErrores // Devuelve true si NO hay errores
+        return !hayErrores // True si está todo correcto
     }
 
+    // Limpia mensajes después de mostrarlos
     fun clearMessages() {
         _uiState.update { it.copy(mensajeExito = null, mensajeError = null) }
     }
